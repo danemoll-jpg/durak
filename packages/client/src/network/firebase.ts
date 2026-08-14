@@ -4,20 +4,18 @@
 // not by hiding this object) — see console.firebase.google.com project settings if these
 // ever need to be regenerated. Same pattern as the Par Five project's firebase.js.
 //
-// TODO: replace with the real config once the Firebase project exists — see the
-// "Deploying" section in the repo README for the exact steps (create project, enable
-// Firestore, copy this object from Project Settings > General > Your apps > Web app,
-// then paste `firestore.rules`'s contents into Firestore > Rules > Publish).
+// Project: durak-60720. No Analytics SDK here on purpose — this app doesn't use it, and
+// skipping it keeps the (already sizeable, see README) client bundle a bit smaller.
 import { initializeApp } from 'firebase/app';
 import { initializeFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: 'REPLACE_ME',
-  authDomain: 'REPLACE_ME.firebaseapp.com',
-  projectId: 'REPLACE_ME',
-  storageBucket: 'REPLACE_ME.firebasestorage.app',
-  messagingSenderId: 'REPLACE_ME',
-  appId: 'REPLACE_ME',
+  apiKey: 'AIzaSyASSs8o0KVTn9f23AzG0JsPUdpU5bvyMhw',
+  authDomain: 'durak-60720.firebaseapp.com',
+  projectId: 'durak-60720',
+  storageBucket: 'durak-60720.firebasestorage.app',
+  messagingSenderId: '688002831991',
+  appId: '1:688002831991:web:353c6eec763b0cce7f5872',
 };
 
 const app = initializeApp(firebaseConfig);
