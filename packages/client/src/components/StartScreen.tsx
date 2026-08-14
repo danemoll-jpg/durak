@@ -1,20 +1,23 @@
 import { useState } from 'react';
 import { unlockAudio } from '../lib/audio';
+import { DEFAULT_PLAYER_ICON } from '../lib/icons';
+import { IconPicker } from './IconPicker';
 
 interface StartScreenProps {
   connected: boolean;
-  onStart: (humanName: string, totalPlayers: number) => void;
+  onStart: (humanName: string, totalPlayers: number, icon: string) => void;
   onBack: () => void;
 }
 
 export function StartScreen({ connected, onStart, onBack }: StartScreenProps) {
   const [name, setName] = useState('');
+  const [icon, setIcon] = useState(DEFAULT_PLAYER_ICON);
   const [totalPlayers, setTotalPlayers] = useState(3);
 
   function handleStart() {
     // Browsers require a real user gesture before audio can play — this click is it.
     unlockAudio();
-    onStart(name, totalPlayers);
+    onStart(name, totalPlayers, icon);
   }
 
   return (
@@ -38,6 +41,11 @@ export function StartScreen({ connected, onStart, onBack }: StartScreenProps) {
             placeholder="Dan"
             maxLength={20}
           />
+        </label>
+
+        <label className="start-screen__label">
+          Your avatar
+          <IconPicker value={icon} onChange={setIcon} />
         </label>
 
         <label className="start-screen__label">

@@ -33,6 +33,7 @@ function LocalGame({ onBack }: { onBack: () => void }) {
   return (
     <GameView
       publicState={game.publicState}
+      playerIcons={game.playerIcons}
       commentary={game.commentary}
       hint={game.hint}
       error={game.error}
@@ -90,6 +91,7 @@ function OnlineGame({ onBack }: { onBack: () => void }) {
   return (
     <GameView
       publicState={room.publicState}
+      playerIcons={room.playerIcons}
       commentary={room.commentary}
       hint={room.hint}
       error={room.error}

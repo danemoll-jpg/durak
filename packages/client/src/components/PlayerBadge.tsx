@@ -1,14 +1,14 @@
-import { PublicPlayerView, PERSONALITIES } from '@durak/engine';
+import { PublicPlayerView } from '@durak/engine';
 
 interface PlayerBadgeProps {
   player: PublicPlayerView;
+  avatar: string;
   isAttacker: boolean;
   isDefender: boolean;
   isActing: boolean;
 }
 
-export function PlayerBadge({ player, isAttacker, isDefender, isActing }: PlayerBadgeProps) {
-  const avatar = player.personality ? PERSONALITIES[player.personality].avatar : '🙂';
+export function PlayerBadge({ player, avatar, isAttacker, isDefender, isActing }: PlayerBadgeProps) {
   const role = isDefender ? 'Defending' : isAttacker ? 'Attacking' : null;
 
   return (

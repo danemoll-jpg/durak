@@ -16,11 +16,12 @@ import { isBotTurn, stepBot } from '../lib/bot';
 import { commentaryForEvents } from '../lib/commentary';
 import { BOT_DISPLAY_NAMES, buildPlayerConfigs, MAX_SEATS, nextBotPersonality, SeatConfig } from '../lib/players';
 import { isMuted, playSound, setMuted, SoundName } from '../lib/audio';
+import { DEFAULT_PLAYER_ICON } from '../lib/icons';
 import { CommentaryEntry } from './useOnlineRoom';
 
 const HUMAN_ID = 'human';
-const BOT_THINK_MIN_MS = 500;
-const BOT_THINK_MAX_MS = 1100;
+const BOT_THINK_MIN_MS = 350;
+const BOT_THINK_MAX_MS = 700;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -37,12 +38,13 @@ let nextCommentaryId = 0;
 export interface UseLocalGame {
   connected: true;
   publicState: PublicGameState | null;
+  playerIcons: Record<string, string>;
   commentary: CommentaryEntry[];
   hint: MoveHint | null;
   error: string | null;
   muted: boolean;
   toggleMuted: () => void;
-  startGame: (humanName: string, totalPlayers: number) => void;
+  startGame: (humanName: string, totalPlayers: number, icon: string) => void;
   sendAction: (action: PlayerAction) => void;
   requestHint: () => void;
   newGame: () => void;
@@ -55,6 +57,7 @@ export interface UseLocalGame {
  * behalf, just called directly here instead of round-tripping over a socket. */
 export function useLocalGame(): UseLocalGame {
   const [state, setState] = useState<GameState | null>(null);
+  const [myIcon, setMyIcon] = useState(DEFAULT_PLAYER_ICON);
   const [commentary, setCommentary] = useState<CommentaryEntry[]>([]);
   const [hint, setHint] = useState<MoveHint | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +91,8 @@ export function useLocalGame(): UseLocalGame {
   );
 
   const startGame = useCallback(
-    (humanName: string, totalPlayers: number) => {
+    (humanName: string, totalPlayers: number, icon: string) => {
+      setMyIcon(icon);
       const count = Math.min(MAX_SEATS, Math.max(2, Math.floor(totalPlayers) || 3));
       const seats: SeatConfig[] = [{ id: HUMAN_ID, name: humanName.trim() || 'You', isBot: false }];
       const used: SeatConfig['personality'][] = [];
@@ -167,10 +171,12 @@ export function useLocalGame(): UseLocalGame {
   }, []);
 
   const publicState = state ? redactState(state, HUMAN_ID) : null;
+  const playerIcons = { [HUMAN_ID]: myIcon };
 
   return {
     connected: true,
     publicState,
+    playerIcons,
     commentary,
     hint,
     error,

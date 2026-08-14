@@ -35,8 +35,11 @@ export interface CommentaryEntry {
   text: string;
 }
 
-const BOT_THINK_MIN_MS = 500;
-const BOT_THINK_MAX_MS = 1100;
+// Deliberately shorter than local play's pause (below) — a single "turn" online can
+// involve several chained bot actions (throw, then another bot throws in, etc.), each
+// with its own Firestore round-trip on top of this delay, so it compounds fast.
+const BOT_THINK_MIN_MS = 250;
+const BOT_THINK_MAX_MS = 500;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -57,14 +60,16 @@ export interface UseOnlineRoom {
   isHost: boolean;
   mySeatIndex: number;
   error: string | null;
-  createAndJoin: (hostName: string) => Promise<void>;
-  joinExisting: (code: string, name: string) => Promise<void>;
+  createAndJoin: (hostName: string, hostIcon: string) => Promise<void>;
+  joinExisting: (code: string, name: string, icon: string) => Promise<void>;
   leaveRoom: () => void;
   addOpenSeat: () => void;
   addBotSeat: () => void;
   removeSeat: (index: number) => void;
   begin: () => void;
   publicState: PublicGameState | null;
+  /** Human players' chosen avatars, keyed by player id — see GameView's playerIcons prop. */
+  playerIcons: Record<string, string>;
   commentary: CommentaryEntry[];
   hint: MoveHint | null;
   muted: boolean;
@@ -146,20 +151,20 @@ export function useOnlineRoom(): UseOnlineRoom {
     });
   }, [isHost, code, room, gameState]);
 
-  const createAndJoin = useCallback(async (hostName: string) => {
+  const createAndJoin = useCallback(async (hostName: string, hostIcon: string) => {
     setError(null);
     try {
-      const newCode = await createRoom(hostName);
+      const newCode = await createRoom(hostName, hostIcon);
       setCode(newCode);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create a room.');
     }
   }, []);
 
-  const joinExisting = useCallback(async (joinCode: string, name: string) => {
+  const joinExisting = useCallback(async (joinCode: string, name: string, icon: string) => {
     setError(null);
     try {
-      const joined = await joinRoom(joinCode, name);
+      const joined = await joinRoom(joinCode, name, icon);
       setCode(joined);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not join that room.');
@@ -252,6 +257,10 @@ export function useOnlineRoom(): UseOnlineRoom {
     .filter((c) => !dismissedSeqs.has(c.seq))
     .map((c) => ({ id: String(c.seq), speakerId: c.speakerId, personality: c.personality, text: c.text }));
 
+  const playerIcons: Record<string, string> = Object.fromEntries(
+    (room?.seats ?? []).filter((s): s is typeof s & { icon: string } => !!s.icon).map((s) => [s.id, s.icon]),
+  );
+
   return {
     connected: room !== null,
     room,
@@ -267,6 +276,7 @@ export function useOnlineRoom(): UseOnlineRoom {
     removeSeat,
     begin,
     publicState,
+    playerIcons,
     commentary,
     hint,
     muted,

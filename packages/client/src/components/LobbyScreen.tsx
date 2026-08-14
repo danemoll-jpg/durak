@@ -1,5 +1,5 @@
 import { RoomDoc } from '../network/rooms';
-import { MAX_SEATS } from '../lib/players';
+import { MAX_SEATS, seatAvatar } from '../lib/players';
 import { unlockAudio } from '../lib/audio';
 
 interface LobbyScreenProps {
@@ -48,7 +48,9 @@ export function LobbyScreen({
         <ul className="lobby__seats">
           {room.seats.map((seat, i) => (
             <li key={seat.id} className="lobby__seat">
-              <span className="lobby__seat-icon">{seat.type === 'bot' ? '🤖' : seat.clientId ? '🧑' : '⏳'}</span>
+              <span className="lobby__seat-icon">
+                {seat.type === 'human' && !seat.clientId ? '⏳' : seatAvatar(seat)}
+              </span>
               <span className="lobby__seat-name">
                 {seat.name}
                 {i === mySeatIndex && ' (you)'}

@@ -41,7 +41,12 @@ button {
 /* ---------- Start screen ---------- */
 
 .start-screen {
+  /* 100dvh (dynamic viewport height) tracks the REAL visible area on mobile Safari —
+     plain 100vh includes space still covered by the address bar, which on the game
+     screen (.app, same fix below) was pushing the hand of cards off the bottom of the
+     screen on iPad. Layered after 100vh so unsupporting browsers just keep that value. */
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,10 +291,40 @@ button {
   font-style: italic;
 }
 
+/* ---------- Icon picker ---------- */
+
+.icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.icon-picker__option {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  background: rgba(0, 0, 0, 0.25);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-picker__option.active {
+  border-color: var(--gold);
+  background: rgba(230, 183, 63, 0.2);
+}
+
 /* ---------- Game layout ---------- */
 
 .app {
-  min-height: 100vh;
+  /* Fixed (not min-) height matching the REAL visible viewport, with an overflow escape
+     hatch — see the dvh note below for why this matters on iPad/mobile Safari. */
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   padding: 1rem;

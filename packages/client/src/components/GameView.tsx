@@ -9,9 +9,13 @@ import { SoundToggle } from './SoundToggle';
 import { Table } from './Table';
 import { CommentaryEntry } from '../hooks/useOnlineRoom';
 import { canPass, canTake, isMyTurn } from '../lib/legality';
+import { seatAvatar } from '../lib/players';
 
 interface GameViewProps {
   publicState: PublicGameState;
+  /** Human players' chosen avatars, keyed by player id — bots don't need an entry here
+   * since seatAvatar() resolves their avatar from `personality` instead. */
+  playerIcons: Record<string, string>;
   commentary: CommentaryEntry[];
   hint: MoveHint | null;
   error: string | null;
@@ -30,6 +34,7 @@ interface GameViewProps {
  * play, since both hooks expose the same PublicGameState-shaped view of the game. */
 export function GameView({
   publicState,
+  playerIcons,
   commentary,
   hint,
   error,
@@ -46,6 +51,10 @@ export function GameView({
   const me = publicState.players[publicState.viewerSeatIndex];
   const opponents = publicState.players.filter((_, i) => i !== publicState.viewerSeatIndex);
   const myTurn = isMyTurn(publicState);
+
+  function avatarFor(p: PublicGameState['players'][number]): string {
+    return seatAvatar({ type: p.isBot ? 'bot' : 'human', personality: p.personality, icon: playerIcons[p.id] });
+  }
 
   function handlePlay(card: CardType) {
     if (publicState.phase === 'awaitingThrowIn') {
@@ -67,6 +76,7 @@ export function GameView({
           <PlayerBadge
             key={p.id}
             player={p}
+            avatar={avatarFor(p)}
             isAttacker={publicState.players[publicState.attackerIndex]?.id === p.id}
             isDefender={publicState.players[publicState.defenderIndex]?.id === p.id}
             isActing={publicState.actingSeat !== null && publicState.players[publicState.actingSeat]?.id === p.id}
@@ -101,6 +111,7 @@ export function GameView({
       <div className="my-area">
         <PlayerBadge
           player={me}
+          avatar={avatarFor(me)}
           isAttacker={publicState.attackerIndex === publicState.viewerSeatIndex}
           isDefender={publicState.defenderIndex === publicState.viewerSeatIndex}
           isActing={myTurn}

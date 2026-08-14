@@ -7,7 +7,7 @@
 //     createdAt: <ms epoch>,
 //     hostClientId: <string>,
 //     phase: "lobby" | "playing",
-//     seats: [{ id, name, type: "human" | "bot", personality?, clientId: string | null }],
+//     seats: [{ id, name, type: "human" | "bot", personality?, icon?, clientId: string | null }],
 //     gameState: null | GameState,  // the full engine state, including every hand — see
 //       the README's "Hand privacy" note: this is knowingly readable by anyone with the
 //       room code, same trust model as Par Five's public leaderboard/room docs.
@@ -34,12 +34,15 @@ const COMMENTARY_LIMIT = 30;
 const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 /** A seat's shape as stored in Firestore — distinct from the engine's SeatConfig (which
- * uses `isBot: boolean`), converted between the two only at startGame(). */
+ * uses `isBot: boolean`), converted between the two only at startGame(). `icon` is the
+ * human player's chosen avatar (see lib/icons.ts) — undefined for bot seats, which use
+ * their personality's fixed avatar instead (see lib/players.ts's seatAvatar()). */
 export interface RoomSeat {
   id: string;
   name: string;
   type: 'human' | 'bot';
   personality?: BotPersonalityId;
+  icon?: string;
   clientId: string | null;
 }
 
@@ -74,14 +77,14 @@ function roomRef(code: string) {
 }
 
 /** Creates a new room with the caller as seat 0 (host). Returns the room code. */
-export async function createRoom(hostName: string): Promise<string> {
+export async function createRoom(hostName: string, hostIcon: string): Promise<string> {
   const code = generateRoomCode();
   const clientId = getClientId();
   const room: RoomDoc = {
     createdAt: Date.now(),
     hostClientId: clientId,
     phase: 'lobby',
-    seats: [{ id: seatId(), name: hostName.trim() || 'Player 1', type: 'human', clientId }],
+    seats: [{ id: seatId(), name: hostName.trim() || 'Player 1', type: 'human', icon: hostIcon, clientId }],
     gameState: null,
     commentary: [],
     nextCommentarySeq: 0,
@@ -137,7 +140,7 @@ export async function removeSeat(code: string, index: number): Promise<void> {
 /** Claims the first open (unclaimed, type "human") seat in the room for this browser.
  * Wrapped in a transaction so two people joining at the same instant can't both claim
  * the same seat. Throws if the room doesn't exist or has no open seat. */
-export async function joinRoom(code: string, name: string): Promise<string> {
+export async function joinRoom(code: string, name: string, icon: string): Promise<string> {
   const clientId = getClientId();
   await runTransaction(db, async (tx) => {
     const ref = roomRef(code);
@@ -152,7 +155,7 @@ export async function joinRoom(code: string, name: string): Promise<string> {
     if (openIndex === -1) throw new Error('That room is full — ask the host to open another seat.');
 
     const seats = [...room.seats];
-    seats[openIndex] = { ...seats[openIndex], name: name.trim() || 'Player', clientId };
+    seats[openIndex] = { ...seats[openIndex], name: name.trim() || 'Player', icon, clientId };
     tx.update(ref, { seats });
   });
   return code.toUpperCase();
