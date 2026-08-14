@@ -7,8 +7,7 @@ interface GameOverScreenProps {
 
 export function GameOverScreen({ state, onPlayAgain }: GameOverScreenProps) {
   const durak = state.players.find((p) => p.id === state.durak);
-  // The viewer losing gets the deliberately broken "You is the Durak!" — a nod to the game's
-  // Russian roots. Everyone else's loss gets proper grammar (this used to be equivalent to
+  // Whether the viewer themselves is the one who lost (this used to be equivalent to
   // "!durak.isBot" back when there was only ever one non-bot player, but that broke once two
   // real humans could play each other — compare against the viewer's own seat instead).
   const humanIsDurak = !!durak && state.players[state.viewerSeatIndex]?.id === state.durak;
@@ -25,7 +24,7 @@ export function GameOverScreen({ state, onPlayAgain }: GameOverScreenProps) {
         ) : (
           <>
             <div className="game-over__emoji">🤡</div>
-            <h2>{humanIsDurak ? 'You is the Durak!' : `${durak?.name ?? 'Someone'} is the Durak!`}</h2>
+            <h2>{humanIsDurak ? 'You are the Durak!' : `${durak?.name ?? 'Someone'} is the Durak!`}</h2>
             <p>Everyone else escaped clean. There is no dignity left to salvage here.</p>
           </>
         )}
