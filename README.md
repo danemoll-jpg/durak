@@ -5,7 +5,9 @@ A web version of **Durak** — the Russian card game where nobody wins so much a
 room code.
 
 Includes:
-- A full **Podkidnoy** ("throw-in") rules engine, 36-card deck, 2-3 players.
+- A full **Podkidnoy** ("throw-in") rules engine, 36-card deck, 2-4 players — any mix of
+  humans and bots online (e.g. 2 humans + 2 bots), capped at 2 bots since only two bot
+  personalities exist today.
 - **Heuristic AI bots** with two trash-talking personalities (Boris and Natasha).
 - **Online play**: create a room, share the 4-letter code, and play a real match against
   someone else from anywhere — synced live via Firestore, no server to run or keep alive.
@@ -127,10 +129,11 @@ committed directly in `firebase.ts`.
   swapped in wherever `new TemplateCommentaryProvider()` is currently constructed
   (`useLocalGame.ts`, `useOnlineRoom.ts`), with no changes to game logic.
   See [claude.com/platform/api](https://claude.com/platform/api) for API keys.
-- **More bot personalities**: add entries to `PERSONALITIES` in
+- **More bot personalities / bigger tables**: add entries to `PERSONALITIES` in
   `packages/engine/src/commentary/personalities.ts` and to `BOT_PERSONALITIES`/
   `BOT_DISPLAY_NAMES` in `packages/client/src/lib/players.ts`, then raise `MAX_SEATS` in that
-  same file past 3.
+  same file past 4 if you want more than 4 seats total (the engine itself isn't tested past 4
+  players, though nothing in its logic is hardcoded to a player count).
 - **Perevodnoy ("passing") rules**: the current engine only implements Podkidnoy. Passing an
   attack sideways instead of defending it would be a targeted addition to
   `packages/engine/src/gameEngine.ts`'s defend handling — the rest of the engine (dealing,

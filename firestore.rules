@@ -16,7 +16,7 @@ service cloud.firestore {
     match /rooms/{roomCode} {
       allow read: if true;
       allow write: if request.resource.data.seats is list
-                   && request.resource.data.seats.size() <= 3;
+                   && request.resource.data.seats.size() <= 4;
     }
   }
 }

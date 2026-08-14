@@ -5,9 +5,13 @@ import { BotPersonalityId, EngineConfig } from '@durak/engine';
 export const BOT_PERSONALITIES: BotPersonalityId[] = ['boris', 'natasha'];
 export const BOT_DISPLAY_NAMES: Record<BotPersonalityId, string> = { boris: 'Boris', natasha: 'Natasha' };
 
-/** Capped at 3 seats total because only two bot personalities exist today — add more
- * entries to PERSONALITIES in @durak/engine and raise this cap to support bigger tables. */
-export const MAX_SEATS = 3;
+/** Capped at 4 seats total — the engine itself is tested up to 4 players (see
+ * packages/engine/tests/gameEngine.test.ts), but only two bot personalities exist today
+ * (Boris, Natasha), so a room can have at most 2 bot seats regardless of this cap
+ * (nextBotPersonality below returns null once both are taken). Add more entries to
+ * PERSONALITIES in @durak/engine and raise this cap further to support bigger all-bot
+ * tables. */
+export const MAX_SEATS = 4;
 
 export interface SeatConfig {
   id: string;
