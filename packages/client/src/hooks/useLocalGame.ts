@@ -63,6 +63,9 @@ export function useLocalGame(): UseLocalGame {
   const [error, setError] = useState<string | null>(null);
   const [muted, setMutedState] = useState(() => isMuted());
   const commentaryProvider = useRef(new TemplateCommentaryProvider());
+  // Remembered so "Deal me back in" (newGame) can redeal immediately with the same
+  // settings instead of dumping the player back at a blank setup screen.
+  const lastConfig = useRef<{ humanName: string; totalPlayers: number; icon: string } | null>(null);
 
   const notifyEvents = useCallback(async (events: GameEvent[], forState: GameState) => {
     if (events.length === 0) return;
@@ -92,6 +95,7 @@ export function useLocalGame(): UseLocalGame {
 
   const startGame = useCallback(
     (humanName: string, totalPlayers: number, icon: string) => {
+      lastConfig.current = { humanName, totalPlayers, icon };
       setMyIcon(icon);
       const count = Math.min(MAX_SEATS, Math.max(2, Math.floor(totalPlayers) || 3));
       const seats: SeatConfig[] = [{ id: HUMAN_ID, name: humanName.trim() || 'You', isBot: false }];
@@ -156,11 +160,19 @@ export function useLocalGame(): UseLocalGame {
   }, []);
 
   const newGame = useCallback(() => {
+    // Redeal immediately with the same name/icon/table size — there's no "back to menu"
+    // control during local play anyway, so falling through to a blank StartScreen here
+    // would be a dead end, not a real choice.
+    if (lastConfig.current) {
+      const { humanName, totalPlayers, icon } = lastConfig.current;
+      startGame(humanName, totalPlayers, icon);
+      return;
+    }
     setState(null);
     setCommentary([]);
     setHint(null);
     setError(null);
-  }, []);
+  }, [startGame]);
 
   const toggleMuted = useCallback(() => {
     setMutedState((prev) => {
