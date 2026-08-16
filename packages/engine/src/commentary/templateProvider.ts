@@ -26,6 +26,12 @@ function baseEventFor(event: GameEvent): BaseEvent | null {
   }
 }
 
+// "took" and "finished" can fire many times over a single game (every time anyone takes
+// the pile or drops out) — commenting on every single one gets noisy fast, so those are
+// only voiced some of the time. The rarer bookend events (game start/deck empty/game over)
+// always get a line since they're novel enough not to feel spammy.
+const SKIP_CHANCE: Partial<Record<BaseKey, number>> = { took: 0.6, finished: 0.5 };
+
 function resolveKey(base: BaseEvent, speakerId: string): CommentaryKey {
   if (base.key === 'gameStart' || base.key === 'deckEmpty' || base.key === 'gameOverDraw') {
     return base.key;
@@ -60,6 +66,8 @@ export class TemplateCommentaryProvider implements CommentaryProvider {
   onEvent(event: GameEvent, state: GameState): CommentaryLine[] {
     const base = baseEventFor(event);
     if (!base) return [];
+    const skipChance = SKIP_CHANCE[base.key];
+    if (skipChance && Math.random() < skipChance) return [];
 
     const bots = state.players.filter((p): p is PlayerState & { personality: NonNullable<PlayerState['personality']> } =>
       p.isBot && !!p.personality,

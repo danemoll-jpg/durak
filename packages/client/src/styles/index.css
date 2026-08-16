@@ -653,11 +653,13 @@ button {
 /* ---------- Commentary feed ---------- */
 
 .commentary-feed {
+  /* Anchored top-right (below the sound toggle), not bottom-right — bottom-right was
+     overlapping the hand of cards on narrower/shorter screens like an iPad. */
   position: fixed;
-  bottom: 1rem;
+  top: 4.2rem;
   right: 1rem;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: 0.5rem;
   max-width: 18rem;
   z-index: 20;
