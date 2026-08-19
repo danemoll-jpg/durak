@@ -1,4 +1,5 @@
 import { PublicGameState } from '@durak/engine';
+import { GAME_HUB_URL } from '../lib/hub';
 
 interface GameOverScreenProps {
   state: PublicGameState;
@@ -28,9 +29,14 @@ export function GameOverScreen({ state, onPlayAgain }: GameOverScreenProps) {
             <p>Everyone else escaped clean. There is no dignity left to salvage here.</p>
           </>
         )}
-        <button type="button" className="game-over__button" onClick={onPlayAgain}>
-          Deal me back in
-        </button>
+        <div className="game-over__actions">
+          <button type="button" className="game-over__button" onClick={onPlayAgain}>
+            Deal me back in
+          </button>
+          <a className="game-over__button game-over__button--secondary" href={GAME_HUB_URL}>
+            🎮 Game Hub
+          </a>
+        </div>
       </div>
     </div>
   );
